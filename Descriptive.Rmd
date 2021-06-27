@@ -470,50 +470,6 @@ ggplot(data, aes(x=group, y=frequency, fill=group)) +
 ```
 
 
-## Variables: Paquete de deportes de R-Víctor y Paquete de deportes de R-Martí
-
-```{r}
-Paquetes_Victor <- bd$`Paquete de deportes de R-Víctor`
-Paquetes_Marti <- bd$`Paquete de deportes de R-Martí`
-
-tabla_abs <- table(Paquetes_Victor, Paquetes_Marti)
-tabla_abs
-
-addmargins(tabla_abs, c(1,2))
-
-tabla_prob<-prop.table(tabla_abs)
-tabla_prob
-
-addmargins(tabla_prob)
-
-chisq.test(tabla_abs)
-#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
-
-mosaic(tabla_abs)
-
-a <- summary(bd$`Paquete de deportes de R-Víctor`)
-b <- summary(bd$`Paquete de deportes de R-Martí`)
-
-cor(a,b)
-chisq.test(a,b)
-```
-
-## Variables: Año de la fecha del primer paquete y año de la fecha del último paquete
-
-```{r}
-bd$YYYY <- year(bd$Fecha)
-bd$YYYY2 <- year(bd$`Fecha del 1er paquete`)
-
-Fecha <- bd$YYYY
-Fecha1 <- bd$YYYY2
-
-tabla_fechas <- table(Fecha, Fecha1)
-tabla_fechas
-
-chisq.test(bd$YYYY, bd$YYYY2)
-cor(Fecha, Fecha1)
-```
-
 ## Variables: Incluye datos e Contiene tutorial de uso
 
 ```{r}
@@ -529,11 +485,6 @@ tabla_prob<-prop.table(tabla_abs)
 tabla_prob
 
 addmargins(tabla_prob)
-
-chisq.test(tabla_abs)
-#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
-
-mosaic(tabla_abs)
 ```
 
 ## Variables: Género y Categoría
@@ -551,50 +502,4 @@ tabla_prob<-prop.table(tabla_abs)
 tabla_prob
 
 addmargins(tabla_prob)
-
-chisq.test(tabla_abs)
-#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
-
-mosaic(tabla_abs)
 ```
-
-## Variables: Deporte y Género
-
-```{r}
-Dep <- bd$Deporte
-
-tabla_abs <- table(Dep, Gen)
-tabla_abs
-
-addmargins(tabla_abs, c(1,2))
-
-tabla_prob<-prop.table(tabla_abs)
-tabla_prob
-
-addmargins(tabla_prob)
-
-chisq.test(tabla_abs)
-#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
-```
-
-## Variables: Deporte y Categoría
-
-```{r}
-tabla_abs <- table(Dep, Cat)
-tabla_abs
-
-addmargins(tabla_abs, c(1,2))
-
-tabla_prob<-prop.table(tabla_abs)
-tabla_prob
-
-addmargins(tabla_prob)
-
-chisq.test(tabla_abs)
-#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
-```
-
-
-
-
-

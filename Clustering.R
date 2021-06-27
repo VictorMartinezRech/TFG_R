@@ -2,7 +2,7 @@ rm(list=ls())
 load('dades.RData')
 
 ##########################################################
-# Llibreries
+# Library
 ##########################################################
 library(tidyverse)
 library(knitr)
@@ -24,22 +24,22 @@ library(ggplot2)
 library(egg)
 
 ##########################################################
-# Filtrar per minutes
+# Filtrar por minutos
 ##########################################################
 ##-- Filter players with more than XX minutes
-min_min <- 30                                        # Minuts mínims
-min_sum <- tapply(d2021$Minutos,d2021$player_id,sum) # Minuts per jugadora
-boxplot(min_sum)                                     # Distribució minuts temporada  
+min_min <- 30                                        # Minutos mínimos
+min_sum <- tapply(d2021$Minutos,d2021$player_id,sum) # Minutos por jugadora
+boxplot(min_sum)                                     # Distribución minutos temporada  
 max(min_sum)
 min(min_sum)
-length(min_sum)                                     # Num. jugadores
-sum(min_sum<min_min)                                 # Jugadores que no arriben a minuts mínims
+length(min_sum)                                     # Num. jugadoras
+sum(min_sum<min_min)                                 # Jugadoras que no llegan a minutos mínimos
 sel_players <- as.numeric(names(min_sum[min_sum>=min_min]))
 d2021b <- d2021 %>% filter(player_id %in% sel_players)
 
 
 ##########################################################
-# Data_frame per k_means
+# Data_frame por k_means
 ##########################################################
 d2021b_kmeans <- as.data.table(d2021b)
 d2021b_kmeans <- d2021b_kmeans[,.(Puntos_min=mean(Puntos_min,na.rm=TRUE),
@@ -108,7 +108,7 @@ km_fit <- d2021b_kmeans %>%
 
 km_fit #Con 8 centers se obtiene un 91.5% de la variabilidad explicada
 
-km_fit$cluster #cluster on es troba cada jugadora
+km_fit$cluster #cluster donde se encuentra cada jugadora
 
 km_fit$centers #medias por cluster
 
@@ -236,16 +236,13 @@ fviz_cluster(km_fit, data = d2021b_kmeans[,c(7,29:36,38:39)],
 
 fviz_cluster(km_fit, data = d2021b_kmeans[,c(7,29:36,38:39)])
 
-d2021b_kmeans[c(52,40,146),] #en teoria les millors jugadores
+d2021b_kmeans[c(52,40,146),] #en teoria las mejores jugadoras
 
 #Gráfico para visualizar los puntos y los centroides en los clústers
 fviz_cluster(km_fit, data = d2021b_kmeans[,c(7,29:36,38:39)], ellipse.type = "euclid",repel = TRUE,star.plot = TRUE)
 
 #Gráfico para mirar los puntos más cercanos entre clústers
 fviz_cluster(res.km, data = d2021b_kmeans[,c(7,29:36,38:39)], ellipse.type = "norm")
-
-#clusplot(d2021b_kmeans[,c(7,29:36,38:39)], res.km$cluster, color=TRUE, shade=F,
-#         labels=1, lines=0) #Da error (se queda cargando)
 
 pc1 <- prcomp(d2021b_kmeans[,c(7,29:36,38:39)], scale=TRUE)
 print(pc1)
@@ -263,13 +260,13 @@ plot(comp.df$cluster[comp.df$team_id == 46], main = "Valencia B.C")
 
 
 ##########################################################
-# Data_frame per k_means longitudinal
+# Data_frame por k_means longitudinal
 ##########################################################
-##-- Trajectories
-VAR <- c('Puntos_min','T2_Anotados_min')   # --> Ho he fet per 2 variables, però s'ha d'afegir totes les estandaritzades per minut
-N_player <- length(table(d2021b$Nombre))   # Numero de jugadores
-N_jorn <- max(d2021b$Jornada_num)          # Numero de jornades
-N_ind <- length(VAR)                       # Numero de indicadors
+##-- Trayectories
+VAR <- c('Puntos_min','T2_Anotados_min')   # Hecho por 2 variables, se deben añadir todas las estandarizadas por minuto
+N_player <- length(table(d2021b$Nombre))   # Número de jugadoras
+N_jorn <- max(d2021b$Jornada_num)          # Número de jornadas
+N_ind <- length(VAR)                       # Número de indicadores
 
 d2021b_kmeans_3d <- array(dim = c(N_player,N_jorn,N_ind))
 for(v in VAR){
@@ -287,9 +284,9 @@ cld3d <- clusterLongData3d(traj=M,
                            maxNA=10)
 ##-- Kmaens longitudinal
 set.seed(12345)
-kml3d(cld3d, nbClusters = 2:4, nbRedrawing = 5, toPlot = "traj") # Slow perque dibuixes trajectories
+kml3d(cld3d, nbClusters = 2:4, nbRedrawing = 5, toPlot = "traj") # Slow porque dibujas trajectorias
 choice(cld3d)
-getClusters(cld3d, 3) ##--> Funcio important per obtenir els clusters i després representar-los
+getClusters(cld3d, 3) ##--> Obtener los clusters y representarlos
 
 
 

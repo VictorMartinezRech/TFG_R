@@ -45,51 +45,15 @@ library(ggplot2)
 library(egg)
 library(gridExtra)
 
-min_min <- 30                                        # Minuts mínims
-min_sum <- tapply(d2021$Minutos,d2021$player_id,sum) # Minuts per jugadora
-boxplot(min_sum)                                     # Distribució minuts temporada  
+min_min <- 30                                        # Minutos mínims
+min_sum <- tapply(d2021$Minutos,d2021$player_id,sum) # Minutos por jugadora
+boxplot(min_sum)                                     # Distribución minutos temporada  
 max(min_sum)
 min(min_sum)
-length(min_sum)                                     # Num. jugadores
-sum(min_sum<min_min)                                 # Jugadores que no arriben a minuts mínims
+length(min_sum)                                     # Num. jugadoras
+sum(min_sum<min_min)                                 # Jugadoras que no legan a minutos mínimos
 sel_players <- as.numeric(names(min_sum[min_sum>=min_min]))
 d2021b <- d2021 %>% filter(player_id %in% sel_players)
-
-d2021b_kmeans <- as.data.table(d2021b)
-d2021b_kmeans <- d2021b_kmeans[,.(Puntos_min=mean(Puntos_min,na.rm=TRUE),
-                                  T2_Anotados_min=mean(T2_Anotados_min,na.rm=TRUE),
-                                  T2_Lanzados_min=mean(T2_Lanzados_min,na.rm=TRUE),
-                                  Perc_T2_min=mean(Perc_T2_min,na.rm=TRUE),
-                                  T3_Anotados_min= mean(T3_Anotados_min,na.rm=TRUE),
-                                  T3_Lanzados_min=mean(T3_Lanzados_min,na.rm=TRUE),
-                                  Per_T3_min=mean(Per_T3_min,na.rm=TRUE),
-                                  T1_Anotados_min=mean(T1_Anotados_min,na.rm=TRUE),
-                                  T1_Lanzados_min=mean(T1_Lanzados_min,na.rm=TRUE),
-                                  Per_T1_min= mean(Per_T1_min,na.rm=TRUE),
-                                  Reb_Of_min= mean(Reb_Of_min,na.rm=TRUE),
-                                  Reb_Def_min=mean(Reb_Def_min,na.rm=TRUE),
-                                  Reb_tot_min= mean(Reb_tot_min,na.rm=TRUE),
-                                  Asist_min=mean(Asist_min,na.rm=TRUE),
-                                  Robos_min=mean(Robos_min,na.rm=TRUE),
-                                  Perdidas_min=mean(Perdidas_min,na.rm=TRUE),
-                                  Tapones_min=mean(Tapones_min,na.rm=TRUE),
-                                  Tapones_Reci_min=mean(Tapones_Reci_min,na.rm=TRUE),
-                                  Mates_min=mean(Mates_min,na.rm=TRUE),
-                                  Faltas_Com_min=mean(Faltas_Com_min,na.rm=TRUE),
-                                  Faltas.Rec_min=mean(Faltas.Rec_min,na.rm=TRUE),
-                                  Valoracion_min=mean(Valoracion_min,na.rm=TRUE),
-                                  FG_min=mean(FG_min,na.rm=TRUE),
-                                  FGA_min=mean(FGA_min,na.rm=TRUE),
-                                  FT_min=mean(FT_min,na.rm=TRUE),
-                                  FTA_min=mean(FTA_min,na.rm=TRUE),
-                                  eFG_min=mean(eFG_min,na.rm=TRUE),
-                                  TSP_min=mean(TSP_min,na.rm=TRUE),
-                                  Winscore_min=mean(Winscore_min,na.rm=TRUE),
-                                  Valoracion_without_P_min=mean(Valoracion_without_P_min,na.rm=TRUE),
-                                  FTrati=mean(FTrati,na.rm=TRUE),
-                                  PTC_min=mean(PTC_min,na.rm=TRUE),
-                                  UR_min=mean(UR_min,na.rm=TRUE)),
-                               by=.(player_id,Nombre,nombre_short,team_id,equipo_short,Equipo)]
 
 d2021b2 <- as.data.table(d2021b)
 d2021b2 <- d2021b2[,.(Minutos=mean(Minutos,na.rm=TRUE),
@@ -137,7 +101,7 @@ barline(data=Pbox.HR, id="Nombre",
         bars=c("Per_T2","Per_T3","Per_T1"), line="Minutos",
         order.by="P_min", labels.bars=c("2P%","3P%","FT%"),
         title="Porcentajes de Acierto Mejor Quinteto")
-??barline
+
 #Radial plot (Mejor quinteto)
 
 Pbox.PG <- subset(d2021b2, player_id==613 |
@@ -155,7 +119,7 @@ radialprofile(data=X, title=Pbox.PG$Nombre, std=FALSE)
 radialprofile(data=X, title=Pbox.PG$Nombre, std=TRUE)
 
 
-#Scatterplot (relacionar métricas, marcar jugadoras de un equipo)
+#Scatterplot (relacionar métricas)
 
 Pbox.sel <- subset(d2021b2, Minutos>= 20)
 attach(Pbox.sel)
@@ -242,7 +206,7 @@ scatterplot(X, data.var=1:5,
             lower=list(continuous="density"),
             diag=list(continuous="densityDiag"))
 
-# Clustering (agrupar jugadoras perfiles)
+# Clustering (agrupar jugadoras por perfiles)
 
 attach(d2021b2)
 data <- data.frame(Puntos, T3_Anotados, T2_Anotados, Reb_tot, Asist, Perdidas,
