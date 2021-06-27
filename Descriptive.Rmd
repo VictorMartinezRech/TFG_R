@@ -1,0 +1,600 @@
+---
+title: "Descriptiva"
+author: "Víctor Martínez Rech"
+date: "8/5/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Librería
+
+```{r}
+library(readxl)
+library(lubridate)
+library(tidyverse)
+library(ggplot2)
+library(plotrix)
+library(vcd)
+library(plotly)
+```
+
+
+# Lectura de datos
+
+```{r}
+bd <- read_excel("D:/TFG/Excel/Paquetes_R_deportes.xlsx")
+head(bd)
+```
+
+Añadimos una nueva variable que indique el año de la fecha del paquete
+
+```{r}
+str(bd)
+bd$YYYY <- year(bd$Fecha)
+bd$YYYY2 <- year(bd$`Fecha del 1er paquete`)
+ggplot(bd, x = Fecha, y = Paquete)
+fig <- plot_ly(x = bd$Fecha, y = bd$Paquete, mode = 'dots', text = paste(bd$Fecha, "seconds from now in GMT"))
+
+a <- rep(1,length(rownames(bd)))
+ggplot(bd, aes(x = Fecha, y = a))+geom_text(aes(label=format(bd$Paquete)),size=3,
+            position = position_nudge(x=18,y=0))
+```
+
+Pasamos las variables cualitativas a factores
+
+```{r}
+fact<-c("Paquete","Título","Paquete de deportes de R-Víctor", "Paquete de deportes de R-Martí", "Paquete de deportes de R-Validación", "Incluye datos", "Deporte", "Género", "Categoría", "Contiene metodología estadística de análisis", "Tipo de metodología", "Contiene tutorial de uso", "Versión del 1er paquete", "Versión del último paquete", "R journal", "JQAS", "Citación del paquete", "Clasificación de categorías") #Variables que trataremos como factores 
+bd[,fact]<-lapply(bd[,fact],as.factor)
+str(bd)
+```
+
+
+# Descriptiva univariante
+
+## Variable: Incluye datos
+
+```{r}
+summary(bd$`Incluye datos`)
+
+Datos_No <- sum(bd$`Incluye datos`=="No")
+Datos_Si_Otros <- sum(bd$`Incluye datos`=="Yes (depends on other packages)")
+Datos_Si <- sum(bd$`Incluye datos`=="Yes")
+
+Incluye_datos <- c(Datos_No, Datos_Si, Datos_Si_Otros)
+names(Incluye_datos) <- c("No","Sí", "Otros paquetes")
+Incluye_datos
+
+data <- data.frame(group=levels(bd$`Incluye datos`),
+  frequency=c(sum(bd$`Incluye datos` == "No"), sum(bd$`Incluye datos` == "Yes"), sum(bd$`Incluye datos` == "Yes (depends on other packages)")))
+
+ggplot(data, aes(x=group, y=frequency)) +
+  geom_bar(stat="identity", width=0.7) + 
+  ggtitle("Gráfico sobre si el paquete incluye base de datos")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label=c("22 (27%)","56 (69%)", "3 (4%)")),
+              position=position_stack(vjust=0.6),color="white",size=4)
+```
+
+## Variable: Deporte
+
+```{r}
+summary(bd$Deporte)
+levels(bd$Deporte)
+
+#Se trata como dummies
+
+American_Football <- c(sum(bd$Deporte =="American Football")+ sum(bd$Deporte == "American Football/Basketball")+ sum(bd$Deporte =="Basketball/American Football/Baseball/Football/Tennis")+ sum(bd$Deporte =="Basketball/Football/American Football/Hockey")+ sum(bd$Deporte == "Football/Baseball/Basketball/Hockey/American Football"))
+
+Basketball <- c(sum(bd$Deporte =="Basketball")+ sum(bd$Deporte == "American Football/Basketball")+ sum(bd$Deporte =="Basketball/American Football/Baseball/Football/Tennis")+ sum(bd$Deporte =="Basketball/Football/American Football/Hockey")+ sum(bd$Deporte == "Football/Baseball/Basketball/Hockey/American Football")+ sum(bd$Deporte == "Billiard/basketball")+ sum(bd$Deporte == "Football/Basketball"))
+
+Arbitrage <- sum(bd$Deporte == "Arbitrage")
+
+Athletics <- sum(bd$Deporte == "Athletics")
+
+Australian_Football <- c(sum(bd$Deporte == "Australian Football")+ sum(bd$Deporte == "Australian Football/Chess/Mahjong")) 
+
+Chess <- c(sum(bd$Deporte == "Chess")+ sum(bd$Deporte == "Australian Football/Chess/Mahjong"))
+
+Mahjong <- sum(bd$Deporte == "Australian Football/Chess/Mahjong")
+
+Baseball <- c(sum(bd$Deporte == "Baseball") + sum(bd$Deporte == "Basketball/American Football/Baseball/Football/Tennis")+ sum(bd$Deporte == "Football/Baseball/Basketball/Hockey/American Football"))
+
+Tennis <- sum(bd$Deporte == "Basketball/American Football/Baseball/Football/Tennis")
+
+Hockey <- c(sum(bd$Deporte == "Hockey") + sum(bd$Deporte == "Basketball/Football/American Football/Hockey")+ sum(bd$Deporte == "Football/Baseball/Basketball/Hockey/American Football")) 
+
+Billiard <- sum(bd$Deporte == "Billiard/basketball") 
+
+Cricket  <- sum(bd$Deporte == "Cricket")  
+
+Cycling  <- c(sum(bd$Deporte == "Cycling") + sum(bd$Deporte == "Running/Cycling/Swimming")+ sum(bd$Deporte == "Walking/Running/Cycling"))
+
+Darts <- sum(bd$Deporte == "Darts") 
+
+Dota2 <- sum(bd$Deporte == "Dota2") 
+
+Football <- c(sum(bd$Deporte == "Football") + sum(bd$Deporte == "Basketball/American Football/Baseball/Football/Tennis")+ sum(bd$Deporte == "Basketball/Football/American Football/Hockey")+ sum(bd$Deporte == "Football/Baseball/Basketball/Hockey/American Football")+ sum(bd$Deporte == "Football/Basketball"))
+
+Injury_sports_medicine <- sum(bd$Deporte == "Injury sports medicine")
+
+Physical_activity <- sum(bd$Deporte == "Physical activity")
+
+Running <- c(sum(bd$Deporte == "Running") + sum(bd$Deporte == "Running/Cycling/Swimming")+ sum(bd$Deporte == "Walking/Running/Cycling"))
+
+Swimming  <- c(sum(bd$Deporte == "Running/Cycling/Swimming")+ sum(bd$Deporte == "Swimming/Scuba diving")) 
+
+Scuba_diving <- c(sum(bd$Deporte == "Scuba diving")+ sum(bd$Deporte == "Swimming/Scuba diving"))  
+
+Softball  <- sum(bd$Deporte == "Softball")
+
+Speedway  <- sum(bd$Deporte == "Speedway") 
+
+Squash <- sum(bd$Deporte == "Squash")
+
+Volleyball <- sum(bd$Deporte == "Volleyball")
+
+Walking <- sum(bd$Deporte == "Walking/Running/Cycling")
+
+Deporte <- c(American_Football, Arbitrage, Athletics, Australian_Football, Baseball, Basketball, Billiard, Chess, Cricket, Cycling, Darts, Dota2, Football, Hockey, Injury_sports_medicine, Mahjong, Physical_activity, Running, Swimming, Scuba_diving, Softball, Speedway, Squash, Tennis, Volleyball, Walking)
+
+names(Deporte) <- c("American_Football", "Arbitrage", "Athletics", "Australian_Football", "Baseball", "Basketball", "Billiard", "Chess", "Cricket", "Cycling", "Darts", "Dota2", "Football", "Hockey", "Injury_sports_medicine", "Mahjong", "Physical_activity", "Running", "Swimming", "Scuba_diving", "Softball", "Speedway", "Squash", "Tennis", "Volleyball", "Walking")
+
+d <- data.frame(Deporte)
+
+data <- data.frame(group=c("American_Football", "Arbitrage", "Athletics", "Australian_Football", "Baseball", "Basketball", "Billiard", "Chess", "Cricket", "Cycling", "Darts", "Dota2", "Football", "Hockey", "Injury_sports_medicine", "Mahjong", "Physical_activity", "Running", "Swimming", "Scuba_diving", "Softball", "Speedway", "Squash", "Tennis", "Volleyball", "Walking"),value= d$Deporte)
+
+#Opción 1:
+ggplot(data, aes(x=group, y=value, fill = group)) +
+  geom_bar(stat="identity", width=0.9) +
+  ggtitle("Gráfico sobre si el paquete incluye base de datos")+ 
+  theme(axis.text.x = element_text(color="black",vjust = 0, 
+                           size=9, angle=90), 
+        plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5), legend.position = "none")+ 
+  geom_text(aes(label=value),
+              position=position_stack(vjust=0.5),color="black",size=2)
+
+#Opción 2:
+ggplot(data, aes(x=group, y=value, fill = group)) +
+  geom_bar(stat="identity", width=0.9) +
+  ggtitle("Gráfico sobre el deporte del paquete")+ 
+  theme(axis.text.x = element_blank(), 
+        plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5),legend.text=element_text(size=8))+ 
+  geom_text(aes(label=value),
+              position=position_stack(vjust=0.5),color="black",size=2)
+```
+
+## Variable: Género
+
+```{r}
+summary(bd$`Género`)
+
+data <- data.frame(group=levels(bd$`Género`),
+  frequency=c(sum(bd$`Género` == "Both"), sum(bd$`Género` == "Male")))
+
+ggplot(data, aes(x=group, y=frequency, fill = group)) +
+  geom_bar(stat="identity", width=0.5) + 
+  ggtitle("Gráfico sobre el género del deporte")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("43 (53%)", "38 (47%)")),
+              position=position_stack(vjust=0.5),color="black",size=4)+scale_fill_brewer(palette="Dark2")
+```
+
+## Variable: Categoría
+
+```{r}
+summary(bd$`Categoría`)
+
+data <- data.frame(group=levels(bd$`Categoría`),
+  frequency=c(sum(bd$`Categoría` == "Amateur"), sum(bd$`Categoría` == "NS"), sum(bd$`Categoría` == "Professional")))
+
+ggplot(data, aes(x=group, y=frequency, fill=group)) +
+  geom_bar(stat="identity", width=0.5) + 
+  ggtitle("Gráfico de la categoría del deporte")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("10 (12%)", "23 (29%)", "48 (59%)")),
+              position=position_stack(vjust=0.5),color="black",size=4)+
+  scale_fill_brewer(palette="Dark2")
+```
+
+## Variable: Contiene metodología estadística de análisis
+
+```{r}
+summary(bd$`Contiene metodología estadística de análisis`)
+
+data <- data.frame(group=levels(bd$`Contiene metodología estadística de análisis`),
+  frequency=c(sum(bd$`Contiene metodología estadística de análisis` == "No"), sum(bd$`Contiene metodología estadística de análisis` == "Yes")))
+
+ggplot(data, aes(x=group, y=frequency, fill = group)) +
+  geom_bar(stat="identity", width=0.5) + 
+  ggtitle("Gráfico sobre si el paquete contiene metodología estadística de análisis")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("41 (51%), 40 (49%)")),
+              position=position_stack(vjust=0.5),color="black",size=4)+scale_fill_brewer(palette="Set1")
+```
+
+## Variable: Tipo de metodología
+
+```{r}
+summary(bd$`Tipo de metodología`)
+levels(bd$`Tipo de metodología`)
+
+#Se trata como dummies 
+
+Categorization <- c(sum(bd$`Tipo de metodología` =="Scraping/categorization"))
+
+Classification <- c(sum(bd$`Tipo de metodología` =="Classification")+ sum(bd$`Tipo de metodología` == "Descriptive/classification")+ sum(bd$`Tipo de metodología` =="Processing/classification")+ sum(bd$`Tipo de metodología` =="Scraping/classification"))
+
+Compute <- c(sum(bd$`Tipo de metodología` == "Compute")+ sum(bd$`Tipo de metodología` == "Compute/prediction")+ sum(bd$`Tipo de metodología` == "Compute/processing")+ sum(bd$`Tipo de metodología` == "Compute/scraping")+ sum(bd$`Tipo de metodología` == "Compute/simulation")+ sum(bd$`Tipo de metodología` == "Compute/visualization")+ sum(bd$`Tipo de metodología` == "Processing/Compute")+ sum(bd$`Tipo de metodología` == "Scraping/Compute"))
+
+Decoding <- c(sum(bd$`Tipo de metodología` =="Decoding")) 
+
+Descriptive <- c(sum(bd$`Tipo de metodología` =="Descriptive") + sum(bd$`Tipo de metodología` =="Descriptive/classification")+ sum(bd$`Tipo de metodología` =="Processing/descriptive"))
+
+Extraction <- c(sum(bd$`Tipo de metodología` == "Extraction/processing"))
+
+Modeling <- c(sum(bd$`Tipo de metodología` == "Modeling/prediction")+ sum(bd$`Tipo de metodología` == "Prediction/modeling"))
+
+Prediction <- c(sum(bd$`Tipo de metodología` == "Compute/prediction")+ sum(bd$`Tipo de metodología` == "Modeling/prediction")+ sum(bd$`Tipo de metodología` == "Prediction/modeling")+ sum(bd$`Tipo de metodología` == "Prediction/preprocessing")+ sum(bd$`Tipo de metodología` == "Prediction/simulation")+ sum(bd$`Tipo de metodología` == "Probabilities/prediction"))
+
+Preprocessing <- c(sum(bd$`Tipo de metodología` == "Prediction/preprocessing")+ sum(bd$`Tipo de metodología` == "Preprocessing/visualization")+ sum(bd$`Tipo de metodología` == "Scraping/preprocessing"))
+
+Probabilities <- c(sum(bd$`Tipo de metodología` == "Probabilities/prediction")+ sum(bd$`Tipo de metodología` == "Scraping/probabilities"))
+
+Processing <- c(sum(bd$`Tipo de metodología` == "Processing")+ sum(bd$`Tipo de metodología` == "Compute/processing")+ sum(bd$`Tipo de metodología` == "Extraction/processing")+ sum(bd$`Tipo de metodología` == "Processing/classification")+ sum(bd$`Tipo de metodología` == "Processing/Compute")+ sum(bd$`Tipo de metodología` == "Processing/descriptive")+ sum(bd$`Tipo de metodología` == "Scraping/processing")+ sum(bd$`Tipo de metodología` == "Visualization/processing"))
+
+Scraping <- c(sum(bd$`Tipo de metodología` == "Scraping")+ sum(bd$`Tipo de metodología` == "Compute/scraping")+ sum(bd$`Tipo de metodología` == "Scraping/categorization")+ sum(bd$`Tipo de metodología` == "Scraping/classification")+ sum(bd$`Tipo de metodología` == "Scraping/Compute")+ sum(bd$`Tipo de metodología` == "Scraping/preprocessing")+ sum(bd$`Tipo de metodología` == "Scraping/probabilities")+ sum(bd$`Tipo de metodología` == "Scraping/processing")+ sum(bd$`Tipo de metodología` == "Scraping/probabilities")+ sum(bd$`Tipo de metodología` =="Scraping/visualization"))
+
+Simulation <- c(sum(bd$`Tipo de metodología` == "Simulation")+ sum(bd$`Tipo de metodología` == "Compute/simulation")+ sum(bd$`Tipo de metodología` == "Prediction/simulation"))
+
+Visualization <- c(sum(bd$`Tipo de metodología` == "Visualization")+ sum(bd$`Tipo de metodología` == "Compute/visualization")+ sum(bd$`Tipo de metodología` == "Preprocessing/visualization")+ sum(bd$`Tipo de metodología` == "Scraping/visualization")+ sum(bd$`Tipo de metodología` == "Visualization/processing"))
+
+Metodologia <- c(Categorization, Classification, Compute, Decoding, Descriptive, Extraction, Modeling, Prediction, Preprocessing, Probabilities, Processing, Scraping, Simulation, Visualization)
+
+names(Metodologia) <- c("Categorization", "Classification", "Compute", "Decoding", "Descriptive", "Extraction", "Modeling", "Prediction", "Preprocessing", "Probabilities", "Processing", "Scraping", "Simulation", "Visualization")
+
+d <- data.frame(Metodologia)
+
+data <- data.frame(group=c("Categorization", "Classification", "Compute", "Decoding", "Descriptive", "Extraction", "Modeling", "Prediction", "Preprocessing", "Probabilities", "Processing", "Scraping", "Simulation", "Visualization"),value= d$Metodologia)
+
+#Opción 1:
+ggplot(data, aes(x=group, y=value, fill = group)) +
+  geom_bar(stat="identity", width=0.9) +
+  ggtitle("Gráfico del tipo de metodología")+ 
+  theme(axis.text.x = element_text(color="black",vjust = 0, 
+                           size=9, angle=90), 
+        plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5), legend.position = "none")+ 
+  geom_text(aes(label=value),
+              position=position_stack(vjust=0.5),color="black",size=2)
+
+#Opción 2:
+ggplot(data, aes(x=group, y=value, fill = group)) +
+  geom_bar(stat="identity", width=0.9) +
+  ggtitle("Gráfico del tipo de metodología")+ 
+  theme(axis.text.x = element_blank(), 
+        plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5),legend.text=element_text(size=8))+ 
+  geom_text(aes(label=value),
+              position=position_stack(vjust=0.5),color="black",size=2)
+```
+
+## Variable: Contiene tutorial de uso
+
+```{r}
+summary(bd$`Contiene tutorial de uso`)
+
+data <- data.frame(group=levels(bd$`Contiene tutorial de uso`),
+  frequency=c(sum(bd$`Contiene tutorial de uso` == "No"), sum(bd$`Contiene tutorial de uso` == "Yes")))
+
+ggplot(data, aes(x=group, y=frequency, fill = group)) +
+  geom_bar(stat="identity", width=0.5) + 
+  ggtitle("Gráfico sobre si el paquete contiene tutorial de uso")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label=c("46 (57%)", "35 (43%)")),
+              position=position_stack(vjust=0.5),color="black",size=4)+scale_fill_brewer(palette="Set1")
+```
+
+## Variable: R journal
+
+```{r}
+summary(bd$`R journal`)
+
+data <- data.frame(group=levels(bd$`R journal`),
+  frequency=c(sum(bd$`R journal` == "No"), sum(bd$`R journal` == "Yes")))
+
+ggplot(data, aes(x=group, y=frequency, fill=group)) +
+  geom_bar(stat="identity", width=0.5) +
+  ggtitle("Gráfico de los paquetes mencionados en R journal")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("78 (96%)", "3 (4%)")),
+              position=position_stack(vjust=0.6),color="black",size=4)+
+  scale_fill_brewer(palette="Set1")
+```
+
+## Variable: JQAS
+
+```{r}
+summary(bd$JQAS)
+
+data <- data.frame(group=levels(bd$JQAS),
+  frequency=c(sum(bd$JQAS == "No"), sum(bd$JQAS == "Yes")))
+
+ggplot(data, aes(x=group, y=frequency, fill=group)) +
+  geom_bar(stat="identity", width=0.5) +
+  ggtitle("Gráfico de los paquetes mencionados en JQAS")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("79 (98%)", "2 (2%)")),
+              position=position_stack(vjust=0.6),color="black",size=4)+
+  scale_fill_brewer(palette="Set1")
+```
+
+## Variable: Clasificación de categorías
+
+```{r}
+summary(bd$`Clasificación de categorías`)
+levels(bd$`Clasificación de categorías`)
+
+data <- data.frame(group=levels(bd$`Clasificación de categorías`),
+  frequency=c(sum(bd$`Clasificación de categorías` == "Athlete health"), sum(bd$`Clasificación de categorías` == "eSports"), sum(bd$`Clasificación de categorías` == "Movement integration"), sum(bd$`Clasificación de categorías` == "Sports performance analysis"),  sum(bd$`Clasificación de categorías` == "Sports technology")))
+
+ggplot(data, aes(x=group, y=frequency, fill=group)) +
+  geom_bar(stat="identity", width=0.5) + 
+  ggtitle("Gráfico de la clasificación de categorías")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("4 (5%)", "3 (4%)", "9 (11%)", "50 (62%)", "15 (18%)")),
+              position=position_stack(vjust=0.5),color="black",size=4)+
+  scale_fill_brewer(palette="Set3")
+```
+
+## Variable: Año de la fecha del último paquete (preguntar si tractar-la com a factor per a fer un barplot o com a numèric i fer un histograma)
+
+```{r}
+summary(bd$YYYY)
+levels(bd$YYYY)
+
+freq <- c(nrow(bd[bd$YYYY == 2011,]), nrow(bd[bd$YYYY == 2012,]), nrow(bd[bd$YYYY == 2013,]), nrow(bd[bd$YYYY == 2014,]), nrow(bd[bd$YYYY == 2015,]), nrow(bd[bd$YYYY == 2016,]), nrow(bd[bd$YYYY == 2017,]), nrow(bd[bd$YYYY == 2018,]), nrow(bd[bd$YYYY == 2019,]), nrow(bd[bd$YYYY == 2020,]), nrow(bd[bd$YYYY == 2021,]))
+
+data <- data.frame(year = 2011:2021,
+  n=freq)
+
+ggplot(data, aes(x=year, y=n)) +
+  geom_line(stat="identity", width=0.5) + 
+  ggtitle("Gráfico del año de la fecha de la última versión del paquete")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+geom_point()+geom_smooth(se = F)
+```
+
+## Variable: Año de la fecha del primer paquete (preguntar si tractar-la com a factor per a fer un barplot o com a numèric i fer un histograma)
+
+```{r}
+summary(bd$YYYY2)
+levels(bd$YYYY2)
+
+freq <- c(nrow(bd[bd$YYYY2 == 2006,]), nrow(bd[bd$YYYY2 == 2007,]), nrow(bd[bd$YYYY2 == 2008,]), nrow(bd[bd$YYYY2 == 2009,]), nrow(bd[bd$YYYY2 == 2010,]), nrow(bd[bd$YYYY2 == 2011,]), nrow(bd[bd$YYYY2 == 2012,]), nrow(bd[bd$YYYY2 == 2013,]), nrow(bd[bd$YYYY2 == 2014,]), nrow(bd[bd$YYYY2 == 2015,]), nrow(bd[bd$YYYY2 == 2016,]), nrow(bd[bd$YYYY2 == 2017,]), nrow(bd[bd$YYYY2 == 2018,]), nrow(bd[bd$YYYY2 == 2019,]), nrow(bd[bd$YYYY2 == 2020,]), nrow(bd[bd$YYYY2 == 2021,]))
+
+data <- data.frame(year = 2006:2021,
+  n=freq)
+
+ggplot(data, aes(x=year, y=n)) +
+  geom_line(stat="identity", width=0.5) + 
+  ggtitle("Gráfico de la tendencia de creación de paquetes por año")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+geom_point()+geom_smooth(se = F)
+
+#library(gridExtra)
+#grid.arrange()
+```
+
+# Análisis bivariante
+
+## Variables: Número de la 1era versión y número de la última versión
+
+```{r}
+for(i in 1:nrow(bd)){
+  actualizacion[i] <- bd$`Versión del 1er paquete`[i] != bd$`Versión del último paquete`[i]
+  i <- i + 1
+}
+
+length(actualizacion[actualizacion == TRUE]) #28 paquetes que no se han actualizado, 53 paquetes que se han actualizado
+
+data <- data.frame(group=c("Actualizado", "No actualizado"),
+  frequency=c(length(actualizacion[actualizacion == TRUE]), length(actualizacion[actualizacion == FALSE])))
+
+ggplot(data, aes(x=group, y=frequency, fill=group)) +
+  geom_bar(stat="identity", width=0.5) +
+  ggtitle("Gráfico de los paquetes que se han actualizado")+ 
+  theme (plot.title = element_text(family="Arial",
+                                  size=rel(1.1), 
+                                  vjust=2, face="bold", 
+                                  color="black",
+                                  lineheight=1.5))+ 
+  geom_text(aes(label= c("53 (65%)", "28 (35%)")),
+              position=position_stack(vjust=0.6),color="black",size=4)+
+  scale_fill_brewer(palette="Set1")
+
+```
+
+
+## Variables: Paquete de deportes de R-Víctor y Paquete de deportes de R-Martí
+
+```{r}
+Paquetes_Victor <- bd$`Paquete de deportes de R-Víctor`
+Paquetes_Marti <- bd$`Paquete de deportes de R-Martí`
+
+tabla_abs <- table(Paquetes_Victor, Paquetes_Marti)
+tabla_abs
+
+addmargins(tabla_abs, c(1,2))
+
+tabla_prob<-prop.table(tabla_abs)
+tabla_prob
+
+addmargins(tabla_prob)
+
+chisq.test(tabla_abs)
+#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
+
+mosaic(tabla_abs)
+
+a <- summary(bd$`Paquete de deportes de R-Víctor`)
+b <- summary(bd$`Paquete de deportes de R-Martí`)
+
+cor(a,b)
+chisq.test(a,b)
+```
+
+## Variables: Año de la fecha del primer paquete y año de la fecha del último paquete
+
+```{r}
+bd$YYYY <- year(bd$Fecha)
+bd$YYYY2 <- year(bd$`Fecha del 1er paquete`)
+
+Fecha <- bd$YYYY
+Fecha1 <- bd$YYYY2
+
+tabla_fechas <- table(Fecha, Fecha1)
+tabla_fechas
+
+chisq.test(bd$YYYY, bd$YYYY2)
+cor(Fecha, Fecha1)
+```
+
+## Variables: Incluye datos e Contiene tutorial de uso
+
+```{r}
+Inc_D <- bd$`Incluye datos`
+Cont_T <- bd$`Contiene tutorial de uso`
+
+tabla_abs <- table(Inc_D, Cont_T)
+tabla_abs
+
+addmargins(tabla_abs, c(1,2))
+
+tabla_prob<-prop.table(tabla_abs)
+tabla_prob
+
+addmargins(tabla_prob)
+
+chisq.test(tabla_abs)
+#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
+
+mosaic(tabla_abs)
+```
+
+## Variables: Género y Categoría
+
+```{r}
+Gen <- bd$`Género`
+Cat <- bd$`Categoría`
+
+tabla_abs <- table(Gen, Cat)
+tabla_abs
+
+addmargins(tabla_abs, c(1,2))
+
+tabla_prob<-prop.table(tabla_abs)
+tabla_prob
+
+addmargins(tabla_prob)
+
+chisq.test(tabla_abs)
+#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
+
+mosaic(tabla_abs)
+```
+
+## Variables: Deporte y Género
+
+```{r}
+Dep <- bd$Deporte
+
+tabla_abs <- table(Dep, Gen)
+tabla_abs
+
+addmargins(tabla_abs, c(1,2))
+
+tabla_prob<-prop.table(tabla_abs)
+tabla_prob
+
+addmargins(tabla_prob)
+
+chisq.test(tabla_abs)
+#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
+```
+
+## Variables: Deporte y Categoría
+
+```{r}
+tabla_abs <- table(Dep, Cat)
+tabla_abs
+
+addmargins(tabla_abs, c(1,2))
+
+tabla_prob<-prop.table(tabla_abs)
+tabla_prob
+
+addmargins(tabla_prob)
+
+chisq.test(tabla_abs)
+#p-valor menor que el nivel de significación, indica que las variables són independientes entre ellas
+```
+
+
+
+
+
